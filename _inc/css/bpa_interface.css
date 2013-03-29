@@ -1,0 +1,80 @@
+/**
+ * These make the activity form look nicer:
+ **/
+div#header {
+    z-index: 100; /* Otherwise it shows over the lightbox */
+}
+div#whats-new-textarea textarea {
+    border: none;
+}
+div.bpa_form_container {
+    border: 1px solid #ccc;
+    padding: 0.8em;
+    position: relative; /* Keeps the drop area limited to the container */
+}
+
+.bpa_images {
+    margin-top: 10px;
+}
+
+.js .bpa_actions_container {
+    overflow: auto;
+    height: 0;
+}
+
+.bpa_controls_container .qq-uploader { position:initial; width: 100%;}
+
+.bpa_controls_container .qq-upload-button {
+    display:block;
+    background: url(../img/camera_inactive.png) left top no-repeat;
+    height: 18px;
+    width: 24px;
+    border: none;
+    float: right;
+    margin: 15px 10px 0 0;
+}
+.bpa_controls_container .qq-upload-button-hover,
+.bpa_controls_container .qq-upload-button-focus {background-image: url(../img/camera.png);}
+
+.bpa_controls_container .qq-upload-drop-area {
+    position:absolute; top:0; left:0; width:100%; height:100%; min-height: 70px; z-index:2;
+    background: rgba(255,255,255,0.5);
+    text-align: center;
+    border: 5px dashed #ccc;
+}
+.bpa_controls_container .qq-upload-drop-area span {
+    display:block; position:absolute; top: 50%; width:100%; margin-top:-8px; font-size:16px;
+}
+.bpa_controls_container .qq-upload-drop-area-active {border-color:#fcc;}
+
+.bpa_controls_container .qq-upload-list { padding:0; list-style:disc;}
+
+.bpa_controls_container .qq-upload-list li {
+    width: 80px;
+    margin: 0 10px;
+    display: inline-block;
+    padding:0;
+    line-height:15px;
+    font-size:12px;
+}
+.bpa_controls_container .qq-upload-list li span {
+    float: left;
+    max-width: 80px;
+    overflow: hidden;
+}
+
+.bpa_preview_photo_item {
+    width: 80px;
+    margin: 0 10px;
+}
+
+.bpa_controls_container .qq-upload-file, .bpa_controls_container .qq-upload-spinner, .bpa_controls_container .qq-upload-size, .bpa_controls_container .qq-upload-cancel, .bpa_controls_container .qq-upload-failed-text {
+    margin-right: 7px;
+}
+
+.bpa_controls_container .qq-upload-file {}
+.bpa_controls_container .qq-upload-spinner {display:inline-block; background: url("loading.gif"); width:15px; height:15px; vertical-align:text-bottom;}
+.bpa_controls_container .qq-upload-size,.bpa_controls_container .qq-upload-cancel {font-size:11px;}
+
+.bpa_controls_container .qq-upload-failed-text {display:none;}
+.bpa_controls_container .qq-upload-fail .qq-upload-failed-text {display:inline;}
