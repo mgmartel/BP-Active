@@ -8,7 +8,8 @@
 
     bpA.init =  function() {
       $form = $("#whats-new-form");
-      $text = $form.find('textarea[name="whats-new"]');
+      //$text = $form.find('textarea[name="whats-new"]');
+      $text = $form.find('textarea#whats-new');
       $buttonLocation = $form.find('#whats-new-options');
       bpA.setup_interface().setupHandlers().submitBinder().setupTriggers();
     }
@@ -51,11 +52,11 @@
             _nonce: bpaVars.nonce,
           },
           "onSubmit": function (id) {
-            if (!parseInt(l10nBpa._max_images)) return true; // Skip check
+            if (!parseInt(bpaVars.max_images)) return true; // Skip check
             id = parseInt(id);
             if (!id) id = $("img.bpa_preview_photo_item").length;
             if (!id) return true;
-            if (id < parseInt(l10nBpa._max_images)) return true;
+            if (id < parseInt(bpaVars.max_images)) return true;
             if (!$("#bpa-too_many_photos").length) $(".bpa_preview_container").after(
               '<div id="message" class="error too-many-photos"><p>' + l10nBpa.images_limit_exceeded + '</p></div>'
             );
@@ -115,7 +116,11 @@
       };
 
       var reset = function(callback) {
-        destroy(function() { createMarkup(); callback(); });
+        destroy(function() {
+          createMarkup();
+          if (callback)
+            callback();
+        });
       }
 
       removeTempImages(init);
@@ -287,7 +292,7 @@
         });
       };
 
-      var oEmbedHandler = function(url) {
+      var oEmbedHandler = function() {
         var already = [],
             preview = false,
             $oembed_container = $('#bpa_oembed_preview_container'),
@@ -328,7 +333,7 @@
 
           });
 
-          $text.on('clear, clear_embed',function() { embed_reset();});
+          $text.on('clear clear_embed',function() { embed_reset();});
           return true;
         };
 
@@ -404,8 +409,17 @@
         return data;
       };
 
+      var setlink = function(url) {
+        var tmp_val = $text.val();
+        $text.val(url).trigger("keyup").val(tmp_val);
+      };
+
+      var setembed = function(url) {
+        oEmbedHandler().maybe_oembed(url);
+      }
+
       init();
-      return { get: get, reset: reset };
+      return { get: get, reset: reset, setLink: setlink, setEmbed: setembed };
     };
 
     bpA.getAll = function() {
@@ -569,6 +583,7 @@
 
   };
   jQuery(document).ready(function() {
-    bpA = BP_Active(jQuery);
+    if ( typeof bpA === 'undefined')
+      bpA = BP_Active(jQuery);
     bpA.init();
   });

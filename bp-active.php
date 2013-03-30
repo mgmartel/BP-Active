@@ -59,10 +59,18 @@ BP_Active_Installer::check();
 require_once ( BP_ACTIVE_DIR . 'functions.php' );
 require_once ( BP_ACTIVE_DIR . 'display.php' );
 
+/**
+ * For backward compatibility: don't show ugly shortcode tags
+ */
+add_shortcode('bpfb_link', '__return_null');
+add_shortcode('bpfb_video', '__return_null');
+add_shortcode('bpfb_images', '__return_null');
+
 if (!class_exists('BP_Active')) :
 
     /**
      * @todo Set up cron job to get rid of old tmp images
+     * @todo Check if BPFB is active
      */
     class BP_Active    {
 
@@ -98,7 +106,86 @@ if (!class_exists('BP_Active')) :
                 require_once ( BP_ACTIVE_DIR . 'ajax.php' );
             else
                 add_action('init', array ( &$this, 'enqueue_css_js' ) );
+
+            // If BP Edit Activity Stream is active, replace the editor by ours
+            if ( function_exists( 'etivite_bp_edit_activity_init' ) )
+                require_once ( BP_ACTIVE_DIR . 'edit.php' );
         }
+
+        public function save($data, $activity_id) {
+            $bpa_data = array();
+
+            if ( isset ( $data['images'] ) && ! empty ( $data['images'] ) ) {
+                $images = $this->move_images($data['images']);
+                if ( $images ) $bpa_data['images'] = $images;
+            }
+            if ( isset ( $data['link'] ) && ! empty ( $data['link'] ) ) {
+                $link_data = $data['link'];
+                // Check if the data is meaningful
+                if ( ! empty ( $link_data['description'] ) ||
+                     ! empty ( $link_data['image'] ) ||
+                        $link_data['title'] != $link_data['url'] ||
+                        ! strpos( " " . $_POST['content'], $link_data['url'] ) )
+                    $bpa_data['link'] = $link_data;
+            }
+
+            // Update activity meta
+            bp_activity_update_meta($activity_id, 'bpa_blog_id', $GLOBALS['blog_id']);
+            if ( ! empty ( $bpa_data ) )
+                bp_activity_update_meta($activity_id, 'bpa_data', $bpa_data);
+        }
+
+            /**
+             * Image moving and resizing routine.
+             *
+             * Relies on WP built-in image resizing.
+             *
+             * @param array Image paths to move from temp directory
+             * @return mixed Array of new image paths, or (bool)false on failure.
+             * @access private
+             * @since bpfb
+             */
+            private function move_images ($imgs) {
+                if (!$imgs) return false;
+                if (!is_array($imgs)) $imgs = array($imgs);
+
+                global $bp;
+                $ret = array();
+                $bpa = BP_Active::init();
+
+                $thumb_w = get_option('thumbnail_size_w');
+                $thumb_w = $thumb_w ? $thumb_w : 100;
+                $thumb_h = get_option('thumbnail_size_h');
+                $thumb_h = $thumb_h ? $thumb_h : 100;
+
+                // Override thumbnail image size in wp-config.php
+                if (defined('BPA_THUMBNAIL_IMAGE_SIZE')) {
+                    list($tw,$th) = explode('x', BPA_THUMBNAIL_IMAGE_SIZE);
+                    $thumb_w = (int)$tw ? (int)$tw : $thumb_w;
+                    $thumb_h = (int)$th ? (int)$th : $thumb_h;
+                }
+
+                $processed = 0;
+                foreach ($imgs as $img) {
+                    $processed++;
+                    if ($bpa->max_images && $processed > $bpa->max_images) break; // Do not even bother to process more.
+                    if ( file_exists ( BP_ACTIVE_BASE_IMAGE_DIR . $img ) ) { // We're editing
+                        $ret[] = $img;
+                        continue;
+                    }
+
+                    $pfx = $bp->loggedin_user->id . '_' . preg_replace('/ /', '', microtime());
+                    $tmp_img = realpath(BP_ACTIVE_TEMP_IMAGE_DIR . $img);
+                    $new_img = BP_ACTIVE_BASE_IMAGE_DIR . "{$pfx}_{$img}";
+                    if (@rename($tmp_img, $new_img)) {
+                        image_resize($new_img, $thumb_w, $thumb_h, false, 'bpat');
+                        $ret[] = pathinfo($new_img, PATHINFO_BASENAME);
+                    }
+                    else return false;
+                }
+
+                return $ret;
+            }
 
         public function enqueue_css_js() {
             global $bp;
@@ -127,22 +214,13 @@ if (!class_exists('BP_Active')) :
          * @since bpfb
          * @todo Don't load this directly into the global namespace
          */
-        function getBpaVars () {
-//            printf(
-//                '<script type="text/javascript">' .
-//                    'var _bpaRootUrl="%s";' .
-//                    'var _bpaTempImageUrl="%s";' .
-//                    'var _bpaBaseImageUrl="%s";' .
-//                '</script>',
-//                BP_ACTIVE_URL,
-//                BP_ACTIVE_TEMP_IMAGE_URL,
-//                BP_ACTIVE_BASE_IMAGE_URL
-//            );
+        public function getBpaVars () {
             $bpaVars = apply_filters('bpa_vars', array(
                 "rootUrl"       => BP_ACTIVE_URL, // Unused?
                 "tempImageUrl"  => BP_ACTIVE_TEMP_IMAGE_URL,
                 "baseImageUrl"  => BP_ACTIVE_BASE_IMAGE_URL, // Unused?
-                "nonce"         => wp_create_nonce('bp-active')
+                "nonce"         => wp_create_nonce('bp-active'),
+                "max_images"    => $this->max_images
             ));
             return $bpaVars;
         }
@@ -182,14 +260,12 @@ if (!class_exists('BP_Active')) :
                 'paste_video_url' => __('Paste video URL here', 'bp-active'),
                 'paste_link_url' => __('Paste link here', 'bp-active'),
                 'images_limit_exceeded' => sprintf(__("You tried to add too many images, only %d will be posted.", 'bp-active'), $this->max_images),
-                // Variables
-                '_max_images' => $this->max_images,
             ) );
             wp_localize_script('bp-active', 'bpaOembedHandlers', $this->getoEmbedHandlers());
             wp_localize_script('bp-active', 'bpaVars', $this->getBpaVars());
         }
 
-        private function getoEmbedHandlers() {
+        public function getoEmbedHandlers() {
             global $bp;
             $embed = $bp->embed;
             $out_a = array();
@@ -241,6 +317,5 @@ if (!class_exists('BP_Active')) :
         }
 
     }
-
     add_action('bp_include', array('BP_Active', 'init'));
 endif;

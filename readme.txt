@@ -18,6 +18,8 @@ The plugin tries to create a preview of the built in WordPress Embed, but parses
 
 This plugin is a complete rewrite of BP Activity Plus. Much credit goes to the authors of this plugin.
 
+If you have (BuddyPress Edit Activity Stream)[http://etivite.com/wordpress-plugins/buddypress-edit-activity-stream/] installed, this plugin also adds edit capabilities for the custom data.
+
 BP Active uses QQ Uploader and jQuery LiveUrl.
 
 == Installation ==

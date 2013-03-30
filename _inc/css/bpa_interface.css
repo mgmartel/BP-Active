@@ -41,6 +41,9 @@ div.bpa_form_container {
     background: rgba(255,255,255,0.5);
     text-align: center;
     border: 5px dashed #ccc;
+    -moz-box-sizing:    border-box;
+   -webkit-box-sizing: border-box;
+    box-sizing:        border-box;
 }
 .bpa_controls_container .qq-upload-drop-area span {
     display:block; position:absolute; top: 50%; width:100%; margin-top:-8px; font-size:16px;

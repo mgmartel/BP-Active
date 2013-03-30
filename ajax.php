@@ -100,30 +100,12 @@ class BP_Active_Ajax
         /**
          * BEGIN BP_ACTIVE
          */
-        $bpa_data = array();
+        $bpa_obj = BP_Active::init();
         $post_data = ( isset ( $_POST['data'] ) && ! empty ( $_POST['data'] ) ) ? $_POST['data'] : false;
 
         // BP Active data sanitize
-        if ( $post_data ) {
-            if ( isset ( $post_data['images'] ) && ! empty ( $post_data['images'] ) ) {
-                $images = $this->move_images($post_data['images']);
-                if ( $images ) $bpa_data['images'] = $images;
-            }
-            if ( isset ( $post_data['link'] ) && ! empty ( $post_data['link'] ) ) {
-                $link_data = $post_data['link'];
-                // Check if the data is meaningful
-                if ( ! empty ( $link_data['description'] ) ||
-                     ! empty ( $link_data['image'] ) ||
-                        $link_data['title'] != $link_data['url'] ||
-                        ! strpos( " " . $_POST['content'], $link_data['url'] ) )
-                    $bpa_data['link'] = $link_data;
-            }
-
-            // Update activity meta
-            bp_activity_update_meta($activity_id, 'bpa_blog_id', $GLOBALS['blog_id']);
-            if ( ! empty ( $bpa_data ) )
-                bp_activity_update_meta($activity_id, 'bpa_data', $bpa_data);
-        }
+        if ( $post_data )
+            $bpa_obj->save($post_data,$activity_id);
         /**
          * END BP ACTIVE
          */
@@ -137,97 +119,6 @@ class BP_Active_Ajax
 
         exit;
 
-//		$bpfb_code = $activity = '';
-//		$aid = 0;
-//        $bpa_data = array();
-//        $post_data = ( isset ( $_POST['data'] ) && ! empty ( $_POST['data'] ) ) ? $_POST['data'] : false;
-//		$gid = ( isset ( $_POST['group_id'] ) && ! empty ( $_POST['group_id'] ) ) ? $_POST['group_id'] : 0;
-//        // $gid === ITEM ID
-//
-//		if ( $post_data && isset ( $post_data['images'] ) && ! empty ( $post_data['images'] ) ) {
-//			$images = $this->move_images($_POST['data']['images']);
-//			if ( $images ) $bpa_data['images'] = $images;
-//		}
-//
-//        $content = apply_filters( 'bp_activity_post_update_content', $content );
-//        $aid = $gid ?
-//            groups_post_update(array('content' => $content, 'group_id' => $gid))
-//            :
-//            bp_activity_post_update(array('content' => $content))
-//        ;
-//
-//        bp_activity_update_meta($aid, 'bpa_blog_id', $GLOBALS['blog_id']);
-//        if ( ! empty ( $bpa_data ) )
-//            bp_activity_update_meta($aid, 'bpa_data', $bpa_data);
-//
-//		if ($aid) {
-//			ob_start();
-//			if ( bp_has_activities ( 'include=' . $aid ) ) {
-//				while ( bp_activities() ) {
-//					bp_the_activity();
-//					locate_template( array( 'activity/entry.php' ), true );
-//				}
-//			}
-//			$activity = ob_get_clean();
-//		}
-//		header('Content-type: application/json');
-//		echo json_encode(array(
-//			//'code' => $bpfb_code,
-//			'id' => $aid,
-//			'activity' => $activity,
-//		));
-//		exit();
-	}
-
-	/**
-	 * Image moving and resizing routine.
-	 *
-	 * Relies on WP built-in image resizing.
-	 *
-	 * @param array Image paths to move from temp directory
-	 * @return mixed Array of new image paths, or (bool)false on failure.
-	 * @access private
-	 */
-	private function move_images ($imgs) {
-		if (!$imgs) return false;
-		if (!is_array($imgs)) $imgs = array($imgs);
-
-		global $bp;
-		$ret = array();
-        $bpa = BP_Active::init();
-
-		$thumb_w = get_option('thumbnail_size_w');
-		$thumb_w = $thumb_w ? $thumb_w : 100;
-		$thumb_h = get_option('thumbnail_size_h');
-		$thumb_h = $thumb_h ? $thumb_h : 100;
-
-		// Override thumbnail image size in wp-config.php
-		if (defined('BPA_THUMBNAIL_IMAGE_SIZE')) {
-			list($tw,$th) = explode('x', BPA_THUMBNAIL_IMAGE_SIZE);
-			$thumb_w = (int)$tw ? (int)$tw : $thumb_w;
-			$thumb_h = (int)$th ? (int)$th : $thumb_h;
-		}
-
-		$processed = 0;
-		foreach ($imgs as $img) {
-			$processed++;
-			if ($bpa->max_images && $processed > $bpa->max_images) break; // Do not even bother to process more.
-			if (preg_match('!^https?:\/\/!i', $img)) { // Just add remote images
-				$ret[] = $img;
-				continue;
-			}
-
-			$pfx = $bp->loggedin_user->id . '_' . preg_replace('/ /', '', microtime());
-			$tmp_img = realpath(BP_ACTIVE_TEMP_IMAGE_DIR . $img);
-			$new_img = BP_ACTIVE_BASE_IMAGE_DIR . "{$pfx}_{$img}";
-			if (@rename($tmp_img, $new_img)) {
-				image_resize($new_img, $thumb_w, $thumb_h, false, 'bpat');
-				$ret[] = pathinfo($new_img, PATHINFO_BASENAME);
-			}
-			else return false;
-		}
-
-		return $ret;
 	}
 
 }

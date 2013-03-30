@@ -20,6 +20,12 @@ class BP_Active_Display {
 
     }
 
+    public function show_images( $image_data, $activity_id ) {
+        $this->current_activity_id = $activity_id;
+        $out = array ( $this->display_images($image_data) );
+        $this->display($out);
+    }
+
     public function setup($c) {
         $this->current_activity_id = bp_get_activity_id();
         $this->bpa_data = bp_activity_get_meta( $this->current_activity_id, 'bpa_data' );
@@ -84,7 +90,7 @@ class BP_Active_Display {
 
     private function display_images( $images ) {
         $activity_id = $this->current_activity_id;
-        $activity_blog_id = bp_activity_get_meta($activity_id, 'bpa_blog_id');
+        //$activity_blog_id = bp_activity_get_meta($activity_id, 'bpa_blog_id');
 
         $use_thickbox = defined('BPA_USE_THICKBOX') ? esc_attr(BPA_USE_THICKBOX) : 'thickbox';
 

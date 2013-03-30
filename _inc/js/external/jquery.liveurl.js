@@ -326,7 +326,7 @@
 
                     core.addImages();
                     /** START BP ACTIVE MOD **/
-                    core.current.one('clear, clear_link', function()
+                    core.current.one('clear clear_link', function()
                     {
                        core.init();
                     });
