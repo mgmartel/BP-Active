@@ -67,6 +67,8 @@ class BP_Active_Ajax
         else
             return false;
 
+        $image->save($path);
+        $image = wp_get_image_editor ( $path );
         switch($orientation) {
             case 3: // rotate 180 degrees
                 $image->rotate(180);
