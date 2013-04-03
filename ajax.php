@@ -56,34 +56,32 @@ class BP_Active_Ajax
 		exit();
 	}
 
-    private function fixOrientation( &$image, $path ) {
+        private function fixOrientation( &$image, $path ) {
 
-        $exif = exif_read_data($path);
+            if ( ! $exif = @exif_read_data($path) ) return;
 
-        if( isset($exif['Orientation']) )
-            $orientation = $exif['Orientation'];
-        elseif( isset($exif['IFD0']['Orientation']) )
-            $orientation = $exif['IFD0']['Orientation'];
-        else
-            return false;
+            if( isset($exif['Orientation']) )
+                $orientation = $exif['Orientation'];
+            elseif( isset($exif['IFD0']['Orientation']) )
+                $orientation = $exif['IFD0']['Orientation'];
+            else
+                return false;
 
-        $image->save($path);
-        $image = wp_get_image_editor ( $path );
-        switch($orientation) {
-            case 3: // rotate 180 degrees
-                $image->rotate(180);
-            break;
+            switch($orientation) {
+                case 3: // rotate 180 degrees
+                    $image->rotate(180);
+                break;
 
-            case 6: // rotate 90 degrees CW
-                $image->rotate(-90);
-            break;
+                case 6: // rotate 90 degrees CW
+                    $image->rotate(-90);
+                break;
 
-            case 8: // rotate 90 degrees CCW
-                $image->rotate(90);
-            break;
+                case 8: // rotate 90 degrees CCW
+                    $image->rotate(90);
+                break;
+            }
+            $image->save($path);
         }
-        $image->save($path);
-    }
 
     /**
 	 * Clears up the temporary images storage.

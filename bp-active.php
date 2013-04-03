@@ -198,12 +198,47 @@ if (!class_exists('BP_Active')) :
                     $new_img = BP_ACTIVE_BASE_IMAGE_DIR . "{$pfx}_{$img}";
                     if (@rename($tmp_img, $new_img)) {
                         image_resize($new_img, $thumb_w, $thumb_h, false, 'bpat');
-                        $ret[] = pathinfo($new_img, PATHINFO_BASENAME);
+                        $id = $this->add_image_attachment( $img, $new_img );
+                        $ret[$id] = pathinfo($new_img, PATHINFO_BASENAME);
+
                     }
                     else return false;
                 }
 
                 return $ret;
+            }
+
+            private function add_image_attachment($filename, $path = '') {
+                if ( empty ( $path ) )
+                   $path = BP_ACTIVE_TEMP_IMAGE_DIR . $filename;
+
+                $url = BP_ACTIVE_BASE_IMAGE_URL . $filename;
+                $title = $filename;
+                $content = '';
+
+                // use image exif/iptc data for title and caption defaults if possible
+                if ( $image_meta = @wp_read_image_metadata($path) ) {
+                    if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) )
+                        $title = $image_meta['title'];
+                    if ( trim( $image_meta['caption'] ) )
+                        $content = $image_meta['caption'];
+                }
+
+                // Construct the attachment array
+                $attachment = array(
+                    'post_mime_type' => 'image',
+                    'guid' => $url,
+                    'post_parent' => 0,
+                    'post_title' => $title,
+                    'post_content' => $content,
+                );
+
+                // Save the data
+                $id = wp_insert_attachment($attachment, $filename);
+                if ( !is_wp_error($id) ) {
+                    wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
+                }
+                return $id;
             }
 
         public function enqueue_css_js() {
