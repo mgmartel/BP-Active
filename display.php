@@ -28,7 +28,7 @@ class BP_Active_Display {
 
     public function setup($c) {
         $this->current_activity_id = bp_get_activity_id();
-        $this->bpa_data = bp_activity_get_meta( $this->current_activity_id, 'bpa_data' );
+        $this->bpa_data = BP_Active::get($this->current_activity_id);
 
         return $c;
     }
@@ -116,7 +116,6 @@ class BP_Active_Display {
             include ( BP_ACTIVE_TEMPLATES . 'link_image.php');
         else include ( BP_ACTIVE_TEMPLATES . 'link.php');
 		$out = ob_get_clean();
-        //ob_end_clean();
 		return $out;
     }
 

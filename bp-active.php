@@ -75,6 +75,7 @@ if (!class_exists('BP_Active')) :
     class BP_Active    {
 
         public $max_images = 5;
+        private $bpa_data;
 
         /**
          * Creates an instance of the BP_Active class
@@ -110,17 +111,35 @@ if (!class_exists('BP_Active')) :
             // If BP Edit Activity Stream is active, replace the editor by ours
             if ( function_exists( 'etivite_bp_edit_activity_init' ) )
                 require_once ( BP_ACTIVE_DIR . 'edit.php' );
+
+            if ( defined('BP_RESHARE_PLUGIN_VERSION' ) )
+                $this->bp_reshare_compat();
         }
 
-        public function save($data, $activity_id) {
-            $bpa_data = array();
+        public static function get( $activity_id ) {
+            return bp_activity_get_meta( $activity_id, 'bpa_data' );
+        }
 
-            if ( isset ( $data['images'] ) && ! empty ( $data['images'] ) ) {
-                $images = $this->move_images($data['images']);
+        /**
+         *
+         * @param mixed $data/$activity
+         * @param int (opt) $activity_id
+         */
+        public function save($data, $activity_id = 0) {
+            if ( is_a ( $data, 'BP_Activity_Activity' ) ) {
+                $activity_id = $data->id;
+                $input_data = $this->bpa_data;
+            } else {
+                $input_data = $data;
+            }
+
+            $bpa_data = array();
+            if ( isset ( $input_data['images'] ) && ! empty ( $input_data['images'] ) ) {
+                $images = $this->move_images($input_data['images']);
                 if ( $images ) $bpa_data['images'] = $images;
             }
-            if ( isset ( $data['link'] ) && ! empty ( $data['link'] ) ) {
-                $link_data = $data['link'];
+            if ( isset ( $input_data['link'] ) && ! empty ( $input_data['link'] ) ) {
+                $link_data = $input_data['link'];
                 // Check if the data is meaningful
                 if ( ! empty ( $link_data['description'] ) ||
                      ! empty ( $link_data['image'] ) ||
@@ -315,6 +334,23 @@ if (!class_exists('BP_Active')) :
                 wp_enqueue_style('bpa_interface_style', BP_ACTIVE_CSS_URL . 'bpa_interface.css');
 
         }
+
+        /**
+         * Compatibility with BP Reshare
+         */
+        private function bp_reshare_compat() {
+            add_filter('bp_reshare_prepare_reshare', array ( &$this, 'bp_reshare_reshare_bpa_data' ), 10, 2 );
+        }
+
+            public function bp_reshare_reshare_bpa_data( $a, $activity_id ) {
+                $bpa_data = self::get($activity_id);
+                if ( ! empty ( $bpa_data ) ) {
+                    $this->bpa_data = $bpa_data;
+                    add_action( 'bp_activity_after_save', array ( &$this, 'save' ) );
+                }
+
+                return $a;
+            }
 
     }
     add_action('bp_include', array('BP_Active', 'init'));

@@ -1,7 +1,7 @@
 <?php
 // We all do things we're not proud of sometimes
 $bpa_obj = BP_Active::init();
-$bpa_data = bp_activity_get_meta( etivite_bp_edit_get_the_activity_id(), 'bpa_data' );
+$bpa_data = BP_Active::get( etivite_bp_edit_get_the_activity_id() );
 $link = $embed = $images = false;
 
 if ( ! empty ( $bpa_data ) ) {

@@ -31,7 +31,7 @@ class BP_Active_Editor
         // Saving!
         $data = json_decode ( stripslashes($_POST['data']), true );
         // Get existing image data
-        $curr_data = bp_activity_get_meta( $activity->id, 'bpa_data' );
+        $curr_data = BP_Active::get( $activity->id );
         if ( isset ( $curr_data['images'] ) && ! empty ( $curr_data['images'] ) ) {
             $data['images'] = array_merge($data['images'], $curr_data['images']);
         }
