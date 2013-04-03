@@ -43,12 +43,47 @@ class BP_Active_Ajax
 		if ( ! class_exists ( 'qqFileUploader' ) ) require_once(BP_ACTIVE_LIB . 'file_uploader.php');
 		$uploader = new qqFileUploader ( array( 'jpg', 'jpeg', 'png', 'gif' ) );
 		$result = $uploader->handleUpload ( BP_ACTIVE_TEMP_IMAGE_DIR );
+
+        // Check for image rotation
+        if ( isset ( $result['success'] ) && $result['success'] ) {
+            $filepath = BP_ACTIVE_TEMP_IMAGE_DIR . $result['file'];
+            $image = wp_get_image_editor ( $filepath );
+            $this->fixOrientation( $image, $filepath );
+        }
+
 		header( 'Content-type: application/json', true, 200 );
 		echo htmlspecialchars ( json_encode($result), ENT_NOQUOTES );
 		exit();
 	}
 
-	/**
+    private function fixOrientation( &$image, $path ) {
+
+        $exif = exif_read_data($path);
+
+        if( isset($exif['Orientation']) )
+            $orientation = $exif['Orientation'];
+        elseif( isset($exif['IFD0']['Orientation']) )
+            $orientation = $exif['IFD0']['Orientation'];
+        else
+            return false;
+
+        switch($orientation) {
+            case 3: // rotate 180 degrees
+                $image->rotate(180);
+            break;
+
+            case 6: // rotate 90 degrees CW
+                $image->rotate(-90);
+            break;
+
+            case 8: // rotate 90 degrees CCW
+                $image->rotate(90);
+            break;
+        }
+        $image->save($path);
+    }
+
+    /**
 	 * Clears up the temporary images storage.
 	 */
 	public function ajax_remove_temp_images () {
