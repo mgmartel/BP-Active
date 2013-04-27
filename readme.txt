@@ -36,5 +36,12 @@ None yet.
 
 == Changelog ==
 
+=0.1.2=
+* Fixed: links are now removed when their preview is closed
+* Don't bother coming up with a preview window if no data is found
+
+=0.1.1=
+* Use EXIF data to automatically rotate images on the server
+
 =0.1=
 * Initial release to GitHub

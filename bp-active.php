@@ -3,7 +3,7 @@
   Plugin Name: BP Active
   Plugin URI: http://trenvo.com
   Description: Description
-  Version: 0.1
+  Version: 0.1.2
   Author: Mike Martel
   Author URI: http://trenvo.nl
  */
@@ -17,7 +17,7 @@ if (!defined('ABSPATH'))
  *
  * @since 0.1
  */
-define('BP_ACTIVE_VERSION', '0.1');
+define('BP_ACTIVE_VERSION', '0.1.2');
 
 /**
  * PATHs and URLs

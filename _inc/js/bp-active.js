@@ -24,6 +24,16 @@
       $form.wrap('<div class="bpa_form_container" />');
       $buttonLocation.after(html);
 
+      // Replace send button, to prevent double listeners
+      $oldSubmit = $("#aw-whats-new-submit");
+      $newSubmit = $("<input>",{
+        type: "submit",
+        name: "aw-whats-new-submit",
+        id:   "aw-whats-new-submit-bp-active",
+        value: $oldSubmit.val()
+      });
+      $oldSubmit.after($newSubmit).remove();
+
       return bpA;
     }
 
@@ -171,6 +181,7 @@
 
           loadStart : showLoader,
           loadEnd : hideLoader,
+          matchNoData: false,
           success : function(data)
           {
             $.extend(currData,data);
@@ -195,6 +206,8 @@
 
               $('textarea').trigger('clear_link');
               curImages = new Array();
+
+              currData = currData.embed ? { embed: currData.embed } : {};
             });
 
             output.show('fast');
@@ -442,7 +455,7 @@
      * From bp-default's global.js
      */
     bpA.submitBinder = function() {
-      jq("input#aw-whats-new-submit").off('click').click( function() {
+      jq("input#aw-whats-new-submit-bp-active").click( function() {
 
         var button = jq(this);
         var form = button.parent().parent().parent().parent();
@@ -486,6 +499,7 @@
               jq(this).prop( 'disabled', false );
             }
           });
+          button.prop('disabled', false);
 
           /* Check for errors and append if found. */
           if ( response[0] + response[1] == '-1' ) {
@@ -539,7 +553,8 @@
           jq("form#whats-new-form textarea").animate({
             height:'20px'
           });
-          jq("#aw-whats-new-submit").prop("disabled", true).removeClass('loading');
+          jq("#aw-whats-new-submit-bp-active").removeClass('loading');
+                  //.prop("disabled", true)
         });
 
         return false;
@@ -570,7 +585,7 @@
        */
       if (!is_setup) {
         // Is So Meta
-        jQuery("input#aw-whats-new-submit").click ( function() {
+        jQuery("input#aw-whats-new-submit-bp-active").click ( function() {
           jQuery(".bpa_actions_container").css('height', '0px');
           bpA.setupTriggers(true); //.animate({height:'0px'}, function() { bpA.setupTriggers(); } );
         });

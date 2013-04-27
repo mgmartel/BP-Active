@@ -47,6 +47,8 @@ class BP_Active_Ajax
         // Check for image rotation
         if ( isset ( $result['success'] ) && $result['success'] ) {
             $filepath = BP_ACTIVE_TEMP_IMAGE_DIR . $result['file'];
+            //add_filter ( 'wp_image_editors', array ( 'WP_Image_Editor_Imagick_Orientation', 'wp_image_editors' ) );
+            add_filter ( 'wp_image_editors', array ( &$this, 'add_image_editor' ) );
             $image = wp_get_image_editor ( $filepath );
             $this->fixOrientation( $image, $filepath );
         }
@@ -55,6 +57,12 @@ class BP_Active_Ajax
 		echo htmlspecialchars ( json_encode($result), ENT_NOQUOTES );
 		exit();
 	}
+
+        public function add_image_editor( $wp_image_editors ) {
+            require_once BP_ACTIVE_LIB . 'class-wp-image-editor-imagick-orientation.php';
+            array_unshift ( $wp_image_editors, "WP_Image_Editor_Imagick_Orientation" );
+            return $wp_image_editors;
+        }
 
         private function fixOrientation( &$image, $path ) {
 
