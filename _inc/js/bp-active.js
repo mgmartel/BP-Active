@@ -15,6 +15,8 @@
     }
 
     bpA.setup_interface = function() {
+      if ( $form.parent().hasClass('bpa_form_container') ) return bpA;
+
       var html = '<div class="bpa_actions_container">' +
                   '<div class="bpa_controls_container"></div>' +
                   '<div class="bpa_preview_container"></div>' +
@@ -46,6 +48,7 @@
 
     bpA.imageHandler = function() {
       $container = $(".bpa_controls_container");
+      if ( ! $container.get(0) ) return {};
 
       var createMarkup = function () {
         var html = '<div id="bpa_tmp_photo"></div>';// +

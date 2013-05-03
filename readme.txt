@@ -4,7 +4,7 @@ Donate link: http://trenvo.com/
 Tags: buddypress, activity, drag and drop, attachments
 Requires at least: WP3.5, BP1.6
 Tested up to:  WP3.5.1, BP1.6.3
-Stable tag: 0.1
+Stable tag: 0.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,12 +36,19 @@ None yet.
 
 == Changelog ==
 
+=0.1.3=
+
+* Small fix for when BP Active is loaded through ajax
+
 =0.1.2=
+
 * Fixed: links are now removed when their preview is closed
 * Don't bother coming up with a preview window if no data is found
 
 =0.1.1=
-* Use EXIF data to automatically rotate images on the server
+
+* Auto-rotate images based on EXIF data
 
 =0.1=
+
 * Initial release to GitHub

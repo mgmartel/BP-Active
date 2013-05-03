@@ -113,6 +113,7 @@ if ( ! empty ( $bpa_data ) ) {
                 $("#bpa_hidden_data").val(JSON.stringify(bpA.getAll()));
                 $(this).find("#save_changes").addClass("loading");
             });
+            $("textarea#whats-new").trigger('focus');
         });
     })(jQuery);
 </script>
