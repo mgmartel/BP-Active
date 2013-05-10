@@ -4,7 +4,7 @@ Donate link: http://trenvo.com/
 Tags: buddypress, activity, drag and drop, attachments
 Requires at least: WP3.5, BP1.6
 Tested up to:  WP3.5.1, BP1.6.3
-Stable tag: 0.1.3
+Stable tag: 0.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,6 +39,7 @@ None yet.
 =0.1.3=
 
 * Small fix for when BP Active is loaded through ajax
+* Include image functions when editing an activity update
 
 =0.1.2=
 

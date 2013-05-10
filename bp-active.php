@@ -202,7 +202,10 @@ if (!class_exists('BP_Active')) :
                         $ret[$id] = pathinfo($new_img, PATHINFO_BASENAME);
 
                     }
-                    else return false;
+                    else {
+                        //var_dump(get_defined_vars()); die;
+                        return false;
+                    }
                 }
 
                 return $ret;
@@ -216,8 +219,11 @@ if (!class_exists('BP_Active')) :
                 $title = $filename;
                 $content = '';
 
+                if ( !function_exists( 'wp_read_image_metadata' ) )
+                    require_once(ABSPATH . 'wp-admin/includes/image.php');
+
                 // use image exif/iptc data for title and caption defaults if possible
-                if ( $image_meta = @wp_read_image_metadata($path) ) {
+                if ( $image_meta = wp_read_image_metadata($path) ) {
                     if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) )
                         $title = $image_meta['title'];
                     if ( trim( $image_meta['caption'] ) )
@@ -235,9 +241,10 @@ if (!class_exists('BP_Active')) :
 
                 // Save the data
                 $id = wp_insert_attachment($attachment, $filename);
-                if ( !is_wp_error($id) ) {
-                    wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
+                if ( is_wp_error($id) ) {
+                    return 0;
                 }
+                wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
                 return $id;
             }
 

@@ -72,6 +72,7 @@ class BP_Active_Display {
         if ( ! empty ( $out ) ) {
             $this->display($out);
         }
+        $this->bpa_data = array();
 
     }
 
