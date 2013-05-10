@@ -76,7 +76,7 @@ div.bpa_form_container {
 }
 
 .bpa_controls_container .qq-upload-file {}
-.bpa_controls_container .qq-upload-spinner {display:inline-block; background: url("loading.gif"); width:15px; height:15px; vertical-align:text-bottom;}
+.bpa_controls_container .qq-upload-spinner {display:inline-block; background: url("../img/loading.gif"); width:15px; height:15px; vertical-align:text-bottom;}
 .bpa_controls_container .qq-upload-size,.bpa_controls_container .qq-upload-cancel {font-size:11px;}
 
 .bpa_controls_container .qq-upload-failed-text {display:none;}

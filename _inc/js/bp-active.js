@@ -64,18 +64,30 @@
             action: "bpa_preview_photo",
             _nonce: bpaVars.nonce,
           },
-          "onSubmit": function (id) {
-            if (!parseInt(bpaVars.max_images)) return true; // Skip check
-            id = parseInt(id);
-            if (!id) id = $("img.bpa_preview_photo_item").length;
-            if (!id) return true;
-            if (id < parseInt(bpaVars.max_images)) return true;
-            if (!$("#bpa-too_many_photos").length) $(".bpa_preview_container").after(
-              '<div id="message" class="error too-many-photos"><p>' + l10nBpa.images_limit_exceeded + '</p></div>'
-            );
-            return false;
+          onSubmit: function (id) {
+            if (parseInt(bpaVars.max_images)) {
+              id = parseInt(id);
+              if (!id) id = $("img.bpa_preview_photo_item").length;
+              if (id && id >= parseInt(bpaVars.max_images)) {
+                if (!$("#bpa-too_many_photos").length) {
+                  $(".bpa_preview_container").after(
+                    '<div id="message" class="error too-many-photos"><p>' + l10nBpa.images_limit_exceeded + '</p></div>'
+                  );
+                }
+                return false;
+              }
+            }
+
+            $newSubmit.prop("disabled", true);
+            return true;
           },
-          "onComplete": createPhotoPreview,
+          onCancel: function() {
+            $newSubmit.prop("disabled", false);
+          },
+          onComplete: function(id, fileName, resp) {
+              createPhotoPreview(resp);
+              $newSubmit.prop("disabled", false);
+          },
           template: '<div class="qq-uploader">' +
                     '<div class="qq-upload-drop-area"><span>' + l10nBpa.drop_files + '</span></div>' +
                     '<div class="qq-upload-button photo-icon"></div>' +
@@ -84,7 +96,7 @@
         });
       };
 
-      var createPhotoPreview = function (id, fileName, resp) {
+      var createPhotoPreview = function (resp) {
         if (! resp || "error" in resp) return false;
         var html = '<img class="bpa_preview_photo_item" src="' + bpaVars.tempImageUrl + resp.file + '" width="80px" />' +
           '<input type="hidden" class="bpa_photos_to_add" name="bpa_photos[]" value="' + resp.file + '" />';
